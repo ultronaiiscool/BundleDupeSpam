@@ -2,6 +2,8 @@
 #include "gui.h"
 #include "packet.h"
 #include "memory.h"
+#include "imgui.h"
+#include "imgui_impl_dx11.h"
 #include <d3d11.h>
 #include <dxgi.h>
 #include <MinHook.h>
