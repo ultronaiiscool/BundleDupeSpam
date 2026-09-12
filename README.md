@@ -25,14 +25,9 @@ Designed for the dropper + bundle duplication setup where normal inventory click
 git clone https://github.com/ultronaiiscool/BundleDupeSpam.git
 cd BundleDupeSpam
 
-# Grab dependencies
-# - imgui (docking or master) into imgui/
-# - MinHook into minhook/
-
-mkdir build
-cd build
-cmake .. -G "Visual Studio 17 2022" -A x64
-cmake --build . --config Release
+# Dependencies are fetched automatically by CMake.
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release
 ```
 
 The resulting `BundleDupeSpam.dll` will be in `build/Release/`.
