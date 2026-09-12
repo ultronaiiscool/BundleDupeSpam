@@ -7,4 +7,5 @@ namespace Hooks {
     bool Initialize();
     void Shutdown();
     bool IsInitialized();
+    const char* GetLastErrorMessage();
 }
