@@ -1,5 +1,5 @@
 #include <Windows.h>
-#include <thread>
+#include <string>
 #include "hooks.h"
 #include "packet.h"
 
@@ -9,9 +9,10 @@ static DWORD WINAPI MainThread(LPVOID) {
     Sleep(2000);
 
     if (!Hooks::Initialize()) {
-        MessageBoxA(nullptr, "Failed to initialize hooks", "BundleDupeSpam", MB_ICONERROR);
+        std::string message = "Failed to initialize hooks:\n\n";
+        message += Hooks::GetLastErrorMessage();
+        MessageBoxA(nullptr, message.c_str(), "BundleDupeSpam", MB_ICONERROR);
         FreeLibraryAndExitThread(g_hModule, 1);
-        return 1;
     }
 
     while (true) {
@@ -23,7 +24,6 @@ static DWORD WINAPI MainThread(LPVOID) {
 
     Hooks::Shutdown();
     FreeLibraryAndExitThread(g_hModule, 0);
-    return 0;
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID) {
