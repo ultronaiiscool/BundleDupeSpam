@@ -1,5 +1,6 @@
 #include "memory.h"
 #include <Psapi.h>
+#include <cstring>
 #include <vector>
 
 #pragma comment(lib, "Psapi.lib")
@@ -11,8 +12,10 @@ uintptr_t GetModuleBase(const wchar_t* moduleName) {
 }
 
 uintptr_t FindPattern(uintptr_t start, size_t size, const char* pattern, const char* mask) {
-    size_t patternLen = strlen(mask);
-    for (size_t i = 0; i < size - patternLen; ++i) {
+    const size_t patternLen = std::strlen(mask);
+    if (patternLen == 0 || size < patternLen) return 0;
+
+    for (size_t i = 0; i <= size - patternLen; ++i) {
         bool found = true;
         for (size_t j = 0; j < patternLen; ++j) {
             if (mask[j] != '?' && pattern[j] != *reinterpret_cast<char*>(start + i + j)) {
@@ -36,11 +39,17 @@ uintptr_t FindPatternInModule(const wchar_t* moduleName, const char* pattern, co
 }
 
 bool WriteBytes(uintptr_t address, const std::vector<uint8_t>& bytes) {
-    DWORD old;
-    if (!VirtualProtect(reinterpret_cast<void*>(address), bytes.size(), PAGE_EXECUTE_READWRITE, &old))
+    if (bytes.empty()) return true;
+
+    DWORD oldProtect = 0;
+    if (!VirtualProtect(reinterpret_cast<void*>(address), bytes.size(), PAGE_EXECUTE_READWRITE, &oldProtect))
         return false;
-    memcpy(reinterpret_cast<void*>(address), bytes.data(), bytes.size());
-    VirtualProtect(reinterpret_cast<void*>(address), bytes.size(), old, &old);
+
+    std::memcpy(reinterpret_cast<void*>(address), bytes.data(), bytes.size());
+
+    DWORD ignored = 0;
+    VirtualProtect(reinterpret_cast<void*>(address), bytes.size(), oldProtect, &ignored);
+    FlushInstructionCache(GetCurrentProcess(), reinterpret_cast<void*>(address), bytes.size());
     return true;
 }
 
